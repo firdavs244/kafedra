@@ -24,6 +24,10 @@ Bo'lmasa — slayd o'zgaradi, ilova emas.
 
 ## 2. Slaydlar — tuzatish shart
 
+> 2026-09-30: yangi 16 slaydli taqdimot tayyorlandi (claude.ai artifact, «KafedraAgent — taqdimot»):
+> barcha raqamlar o'lchangan (17/17, 2,1 s, 5 ms, 24/24, 76 test), skrinshotlar jonli saytdan.
+> Pastdagi jadval — eski PDF taqdimot uchun tanqid.
+
 | Slayd | Muammo | Nima qilish |
 |---|---|---|
 | 1 | «Ilmiy rahbar: ____» bo'sh | To'ldiring yoki olib tashlang |

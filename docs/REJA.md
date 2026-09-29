@@ -25,8 +25,12 @@ Limitlar (har model, tashkilot bo'yicha): 1000 so'rov/kun, 8000 token/daqiqa; qw
 Rasm tahlili: namuna qaydnoma — 24/24 qator to'g'ri, 744 chiqish token, 1.8–3.3 s;
 OCR "Algoritmalar" xatosi fuzzy moslash bilan tuzatiladi.
 
-Sifat o'lchovi (tezkor to'plam, 2026-09-29): 5/6 — xato topildi (qarzdorlar soni 174 ≠ 169,
-model qisqartirilgan ro'yxatni o'zi sanagan) → tuzatildi (`jami_qatorlar`).
+Sifat o'lchovi (to'liq to'plam, 17 savol, jonli Groq, `tests/live/bench.live.test.js`), 2026-09-30:
+- 1-o'lchov: 14/17 — 3 ta javob uzildi (2 limit, 1 ixtiyoriy parametrga null → Groq sxemani rad etdi).
+- 2-o'lchov: 14/17 — zaxira gpt-oss-120b 3 raqamni noto'g'ri o'qidi (685≠670 talaba, 5≠1 Scopus, grant rahbari «topilmadi»).
+- Tuzatish: nullable sxema, kontingent jami, tur×holat sanog'i, `loyihalar.turi`, bo'sh filtr izohi, 2 marta qayta urinish.
+- 3-o'lchov: **17/17**, o'rtacha 2.05 s (1.2–4.8 s); qwen 5/5, gpt-oss-120b 12/12.
+Yuklama taqsimoti tezligi: 277 birlik → 18 o'qituvchi, median 5 ms (20 marta).
 
 ## Ongli ravishda qilinmaganlar
 
