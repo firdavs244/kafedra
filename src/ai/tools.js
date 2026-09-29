@@ -6,12 +6,12 @@
 // Natijalar ixcham jadval ko'rinishida ({ustunlar, qatorlar}) — Groq bepul
 // tarifida daqiqasiga 8000 token limiti bor, har bir kalit nomini har qatorda
 // takrorlash shu limitni tez yeb qo'yardi.
-import { PUB_STATUS, SCHEMA, TITLES } from '../lib/constants.js';
+import { PROJ_STATUS, PUB_STATUS, SCHEMA, TITLES } from '../lib/constants.js';
 import { addDays, daysBetween, fmtMonth, fmtShort, isISO, monthDays, weekdayName } from '../lib/dates.js';
 import { norm, num, shortName } from '../lib/format.js';
 import { computeAlerts, currentSemester, deadlines, kpiByCategory, kpiOfMonth, kpiScore, kpiStatus, pubLate, pubSoon, stLate, subjState, summary, teacherStats, tshort } from '../lib/analytics.js';
 import { attCode, attMonthStats, attStatus, isWorkday } from '../lib/attendance.js';
-import { debtors, gradeRow, gradesByGroup, gradesBySubject, gradesTotal } from '../lib/grades.js';
+import { contingent, debtors, gradeRow, gradesByGroup, gradesBySubject, gradesTotal } from '../lib/grades.js';
 import { activePlans, allocItems, allocStale, avgNorm, lcGroups, lcIsOurs, lcPlanLabel, LC_KIND, wlSummary } from '../lib/workload.js';
 
 const R = Math.round;
@@ -246,16 +246,30 @@ function ilmiy_ishlar(ctx, { oqituvchi, holat, turi, faqat_muammoli } = {}) {
   if (turi) list = list.filter((p) => norm(p.type).includes(norm(turi)));
   if (faqat_muammoli) list = list.filter((p) => pubLate(ctx, p) || pubSoon(ctx, p));
   const plan = ctx.teachers.map((t) => ({ t, s: teacherStats(ctx, t) })).filter((x) => !faqat_muammoli || x.s.pubBehind);
+  // Tayyor sanoq: "Scopus'da nechta CHOP ETILGAN" kabi savolga model o'zi sanamasin
+  const byType = {};
+  ctx.pubs.forEach((p) => {
+    byType[p.type] = byType[p.type] || {};
+    byType[p.type][p.status] = (byType[p.type][p.status] || 0) + 1;
+  });
   return {
     holatlar: Object.fromEntries(PUB_STATUS.map((s) => [s, ctx.pubs.filter((p) => p.status === s).length])),
+    tur_va_holat_boyicha_soni: byType,
+    ...(!list.length && (holat || turi) ? { izoh: `Filtr bo'yicha ish topilmadi. Mavjud holatlar: ${PUB_STATUS.join(', ')}; turlar: ${Object.keys(byType).join(', ')}` } : {}),
     ishlar: table(['mavzu', 'muallif', 'turi', 'jurnal', 'kvartil', 'holat', 'muddat', 'chop_sanasi', 'muammo', 'ichki_id'], list.map((p) => [p.title, tshort(ctx, p.teacherId), p.type, p.journal || '', p.quartile && p.quartile !== '—' ? p.quartile : '', p.status, D(p.deadline), D(p.pubDate), pubLate(ctx, p) ? `muddati ${daysBetween(p.deadline, ctx.today)} kun o'tgan` : pubSoon(ctx, p) ? `${daysBetween(ctx.today, p.deadline)} kun qoldi` : '', p.id])),
     yillik_reja_bajarilishi: table(['oqituvchi', 'reja', 'bajarilgan', 'bugungacha_kutilgan', 'muddati_otgan', 'ortda'], plan.map(({ t, s }) => [shortName(t.name), s.pubPlan, s.published + s.accepted, s.expectedPubs, s.overdue.length, s.pubBehind ? 'ha' : "yo'q"])),
   };
 }
 
-function loyihalar(ctx, { holat } = {}) {
-  const list = ctx.projects.filter((p) => !holat || norm(p.status) === norm(holat));
+function loyihalar(ctx, { holat, turi } = {}) {
+  let list = ctx.projects.filter((p) => (!holat || norm(p.status) === norm(holat)) && (!turi || norm(p.type).includes(norm(turi))));
+  let izoh;
+  if (!list.length && (holat || turi)) {
+    izoh = `Filtr bo'yicha loyiha topilmadi — barcha loyihalar ko'rsatildi. Holatlar: ${PROJ_STATUS.join(', ')}; turlar: ${[...new Set(ctx.projects.map((p) => p.type))].join(', ')}`;
+    list = ctx.projects;
+  }
   return {
+    ...(izoh ? { izoh } : {}),
     faol_mablag_mln_som: ctx.projects.filter((p) => p.status === 'Jarayonda').reduce((a, p) => a + num(p.funding), 0),
     ...table(['nomi', 'turi', 'rahbar', 'ijrochilar', 'mablag_mln', 'holat', 'boshlanish', 'tugash', 'qolgan_kun', 'bajarilish_foiz', 'xavf', 'ichki_id'], list.map((p) => {
       const d = p.end ? daysBetween(ctx.today, p.end) : null;
@@ -269,6 +283,7 @@ function talabalar_bilan_ish(ctx, { turi, faqat_kechikkan } = {}) {
   let list = ctx.stwork.slice();
   if (turi) list = list.filter((s) => norm(s.kind).includes(norm(turi)));
   if (faqat_kechikkan) list = list.filter((s) => stLate(ctx, s));
+  if (!list.length && turi) return { izoh: `«${turi}» turida ish topilmadi. Mavjud turlar: ${[...new Set(ctx.stwork.map((s) => s.kind))].join(', ')}` };
   return table(['turi', 'mavzu', 'talaba', 'rahbar', 'muddat', 'holat', 'ichki_id'], list.map((s) => [s.kind, s.topic, s.student, tshort(ctx, s.teacherId), D(s.deadline), stLate(ctx, s) ? 'kechikkan' : s.status, s.id]));
 }
 
@@ -314,7 +329,9 @@ function ozlashtirish(ctx, { guruh, fan, kurs, qarzdorlar } = {}) {
   const f = norm(fan);
   const bySubj = gradesBySubject(ctx).filter((x) => !f || norm(x.subject).includes(f));
   const byGroup = gradesByGroup(ctx).filter((x) => (!g || norm(x.group).includes(g)) && (!kurs || +x.kurs === +kurs));
+  const cont = contingent(ctx);
   const out = {
+    kafedra_kontingenti: { jami_talabalar: cont.students, jami_guruhlar: cont.groups },
     sessiya: ctx.grades[0]?.session,
     izoh: "o'zlashtirish = 3 va undan yuqori baho olganlar ulushi; sifat = 4 va 5 olganlar ulushi; me'yor 80%",
     umumiy: { ozlashtirish_foiz: t.pass, sifat_foiz: t.quality, ortacha_baho: t.avg, qarzdorlar: t.f },
@@ -343,7 +360,14 @@ function ogohlantirishlar(ctx) {
 
 /* ---------------- ta'riflar ---------------- */
 
-const P = (props = {}, required) => ({ type: 'object', properties: props, ...(required ? { required } : {}) });
+// Ixtiyoriy parametr null ham bo'lishi mumkin: model ba'zan {"oqituvchi": null} yuboradi va
+// Groq sxemani qat'iy tekshirib, butun so'rovni rad etardi (2026-09-30 o'lchovida topilgan).
+const nullable = (prop) => (typeof prop.type === 'string' && prop.type !== 'object' ? { ...prop, type: [prop.type, 'null'] } : prop);
+const P = (props = {}, required) => ({
+  type: 'object',
+  properties: Object.fromEntries(Object.entries(props).map(([k, v]) => [k, (required || []).includes(k) ? v : nullable(v)])),
+  ...(required ? { required } : {}),
+});
 const S = (description, extra = {}) => ({ type: 'string', description, ...extra });
 const EDITABLE = ['teachers', 'subjects', 'pubs', 'projects', 'stwork', 'kpi'];
 
@@ -355,7 +379,7 @@ export const TOOLS = {
   dars_bajarilishi: { run: dars_bajarilishi, label: 'Dars bajarilishi', def: { description: "Fanlar bo'yicha o'tilgan va bugungacha kutilgan dars soatlari (joriy semestr).", parameters: P({ oqituvchi: S('Familiya'), faqat_ortda: { type: 'boolean' }, semestr: S("'1' yoki '2'") }) } },
   kpi: { run: kpi, label: 'KPI', def: { description: "KPI bandlari: reja, fakt, holat, mas'ul, yo'nalishlar va vaznli umumiy bajarilish.", parameters: P({ oy: S('YYYY-MM (sukut: joriy oy)'), holat: S('Filtr', { enum: ['hammasi', 'bajarilmadi', 'xavf', 'jarayonda', 'bajarildi'] }) }) } },
   ilmiy_ishlar: { run: ilmiy_ishlar, label: 'Ilmiy ishlar', def: { description: "Maqolalar va ilmiy ishlar ro'yxati hamda har o'qituvchining yillik maqola rejasi bajarilishi.", parameters: P({ oqituvchi: S('Familiya'), holat: S('Holat', { enum: PUB_STATUS }), turi: S('Masalan Scopus, OAK'), faqat_muammoli: { type: 'boolean', description: 'faqat muddati o\'tgan/yaqin va ortda qolganlar' } }) } },
-  loyihalar: { run: loyihalar, label: 'Loyihalar', def: { description: "Loyihalar va grantlar: rahbar, mablag', muddat, bajarilish, xavf.", parameters: P({ holat: S('Holat') }) } },
+  loyihalar: { run: loyihalar, label: 'Loyihalar', def: { description: "Loyihalar va grantlar: turi, rahbar, mablag', muddat, bajarilish, xavf.", parameters: P({ holat: S('Holat', { enum: PROJ_STATUS }), turi: S("Masalan 'Xalqaro grant', 'Davlat granti', 'Startap'") }) } },
   talabalar_bilan_ish: { run: talabalar_bilan_ish, label: 'Talabalar bilan ish', def: { description: "BMI, magistrlik, kurs ishi, olimpiada, to'garak, talaba maqolalari.", parameters: P({ turi: S('Ish turi'), faqat_kechikkan: { type: 'boolean' } }) } },
   davomat: { run: davomat, label: 'Davomat', def: { description: "O'qituvchilar davomati. sana berilsa — o'sha kun (keldi/kechikdi/kelmadi), aks holda oylik statistika.", parameters: P({ sana: S("YYYY-MM-DD, 'bugun' yoki 'kecha'"), oy: S('YYYY-MM'), oqituvchi: S('Familiya') }) } },
   ozlashtirish: { run: ozlashtirish, label: "O'zlashtirish", def: { description: "Talabalar o'zlashtirishi (oxirgi sessiya): fan va guruh kesimida o'zlashtirish, sifat, akademik qarzdorlar.", parameters: P({ guruh: S('Guruh nomi'), fan: S('Fan nomi'), kurs: { type: 'integer' }, qarzdorlar: { type: 'boolean', description: "qarzdorlar ro'yxati kerakmi" } }) } },

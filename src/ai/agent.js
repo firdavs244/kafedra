@@ -56,7 +56,7 @@ O'qituvchilar: ${ctx.teachers.map((t) => shortName(t.name)).join(', ')}.
 QOIDALAR:
 1. Faqat o'zbek tilida (lotin yozuvi) javob ber.
 2. Har bir raqam, ism, sana va ro'yxatni FAQAT vositalar natijasidan ol. Hech narsani taxmin qilma va o'ylab topma. Jami sonni natijadagi "jami"/"jami_qatorlar" maydonidan ol — qatorlarni o'zing sanama va qo'shma. Bir nechta teng qiymat bo'lsa, hammasini ayt. Kerakli ma'lumot yo'q bo'lsa, shuni ochiq ayt va qaysi bo'limga kiritish kerakligini ko'rsat.
-3. Kerakli vositalarni bir vaqtda chaqir. Bir vositani bir xil argument bilan qayta chaqirma.
+3. Kerakli vositalarni bir vaqtda chaqir. Bir vositani bir xil argument bilan qayta chaqirma. Kafedra bo'yicha umumiy son (o'qituvchi, talaba, guruh, loyiha) so'ralsa — kafedra_holati natijasidagi tayyor sondan foydalan.
 4. Javob tuzilishi: 1–2 jumlali aniq xulosa → tafsilot (qisqa ro'yxat yoki markdown jadval, 12 qatordan oshmasin; ko'p bo'lsa eng muhimlarini ko'rsat va qolganini jami bilan ayt) → agar savol tahliliy bo'lsa, "**Tavsiyalar**" (2–4 ta, mas'ul shaxs bilan). Hajmi 250 so'zdan oshmasin.
 5. Ismlarni "Familiya I.O." shaklida, oylarni so'z bilan (masalan "sentyabr") yoz. Uslub — ishchan, hurmatli, kirish so'zlarisiz. "ichki_id" va vosita nomlarini javobda HECH QACHON ko'rsatma; jadval sarlavhalarini oddiy o'zbekcha so'z bilan yoz.
 6. Ma'lumotni o'zgartirish/qo'shish so'ralsa — taklif_* vositasi bilan TAKLIF tayyorla va "tasdiqlash uchun taklif tayyor" de; "saqlandi" dema.${fields}`;
@@ -77,7 +77,7 @@ function clip(obj) {
  * @param {object} p.ctx      makeCtx natijasi (joriy ma'lumotlar)
  * @param {(ev)=>void} p.onUpdate  {text, trace, status, wait}
  */
-export async function runAgent({ question, history = [], ctx, onUpdate, onProposal, signal, maxTokens = 1000 }) {
+export async function runAgent({ question, history = [], ctx, onUpdate, onProposal, signal, maxTokens = 1000, model: wantModel }) {
   const t0 = performance.now();
   const names = selectTools(question);
   const tools = toolDefs(names);
@@ -97,11 +97,12 @@ export async function runAgent({ question, history = [], ctx, onUpdate, onPropos
         toolChoice: last ? 'none' : undefined,
         maxTokens,
         signal,
+        model: wantModel,
         onDelta: (t, hasTools) => {
           if (!hasTools) onUpdate?.({ text: t, trace, status: 'streaming' });
         },
       }),
-      { signal, onWait: (s) => onUpdate?.({ text: '', trace, status: 'waiting', wait: s }) },
+      { signal, maxWait: 40, retries: 2, onWait: (s) => onUpdate?.({ text: '', trace, status: 'waiting', wait: s }) },
     );
     model = r.model || model;
     if (r.usage) {

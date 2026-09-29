@@ -51,6 +51,14 @@ describe('AI vositalari', () => {
     expect(selectTools('Salom, nima qila olasan?').length).toBe(READ_TOOLS.length);
   });
 
+  it("ixtiyoriy parametrlar null qabul qiladi, majburiylari — yo'q (Groq sxema tekshiruvi)", () => {
+    const y = toolDefs(['yuklama_taqsimoti'])[0].function.parameters.properties.oqituvchi;
+    expect(y.type).toEqual(['string', 'null']);
+    const t = toolDefs(['taklif_ozgartirish'])[0].function.parameters;
+    expect(t.properties.bolim.type).toBe('string');
+    expect(runTool(ctx, 'yuklama_taqsimoti', { oqituvchi: null }).xato).toBeUndefined();
+  });
+
   it("vosita ta'riflari va tizim ko'rsatmasi ixcham", () => {
     const all = JSON.stringify(toolDefs(Object.keys(TOOLS)));
     expect(all.length).toBeLessThan(7000);
@@ -85,5 +93,22 @@ describe('hisobotlar', () => {
       expect(rep.sections.length, k.id).toBeGreaterThan(1);
       expect(reportDigest(rep).length).toBeLessThanOrEqual(3502);
     }
+  });
+});
+
+describe('zaxira model xatolaridan himoya (2026-09-30 o\'lchovi)', () => {
+  it("Scopus: tur va holat bo'yicha tayyor sanoq bor", () => {
+    const out = runTool(ctx, 'ilmiy_ishlar', { turi: 'Scopus' });
+    expect(out.tur_va_holat_boyicha_soni.Scopus['Chop etilgan']).toBe(1);
+  });
+  it("loyiha turi holat maydoniga yozilsa ham bo'sh natija qaytmaydi", () => {
+    const out = runTool(ctx, 'loyihalar', { holat: 'Xalqaro grant' });
+    expect(out.izoh).toMatch(/topilmadi/);
+    expect(out.qatorlar.length).toBe(ctx.projects.length);
+    const g = runTool(ctx, 'loyihalar', { turi: 'Xalqaro grant' });
+    expect(g.qatorlar).toHaveLength(1);
+  });
+  it("o'zlashtirish natijasida kontingent jami tayyor", () => {
+    expect(runTool(ctx, 'ozlashtirish', {}).kafedra_kontingenti.jami_talabalar).toBe(670);
   });
 });

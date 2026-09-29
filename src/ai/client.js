@@ -58,7 +58,7 @@ async function asError(res) {
 /**
  * @returns {Promise<{message:{role,content,tool_calls?}, usage, model, finish, ms}>}
  */
-export async function chatCompletion({ messages, tools, toolChoice, stream = true, maxTokens = 700, temperature = 0.2, responseFormat, signal, onDelta }) {
+export async function chatCompletion({ messages, tools, toolChoice, stream = true, maxTokens = 700, temperature = 0.2, responseFormat, signal, onDelta, model: wantModel }) {
   const t0 = performance.now();
   let res;
   try {
@@ -68,6 +68,7 @@ export async function chatCompletion({ messages, tools, toolChoice, stream = tru
       signal,
       body: JSON.stringify({
         messages,
+        model: wantModel,
         tools: tools?.length ? tools : undefined,
         tool_choice: toolChoice,
         stream,
