@@ -1,0 +1,6 @@
+# Repoda qator oxiri doim LF (Windows/Mac/Linux orasida farq chiqmasin)
+* text=auto eol=lf
+*.jpg binary
+*.png binary
+*.xlsx binary
+*.pdf binary

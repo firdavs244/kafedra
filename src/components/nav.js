@@ -1,0 +1,21 @@
+// Yon panel tuzilishi — bitta joyda (qidiruv ham shundan foydalanadi)
+export const NAV = [
+  { key: 'home', path: '/', label: 'Bosh sahifa', icon: 'home' },
+  { key: 'agent', path: '/agent', label: 'AI Agent', icon: 'agent' },
+  { key: 'scan', path: '/hujjat', label: 'Hujjat tahlili', icon: 'scan', isNew: true },
+  { sep: 'Faoliyat' },
+  { key: 'workload', path: '/yuklama', label: 'Yuklama taqsimoti', icon: 'workload' },
+  { key: 'subjects', path: '/oquv-yuklama', label: "O'quv yuklama", icon: 'subjects' },
+  { key: 'teachers', path: '/oqituvchilar', label: "O'qituvchilar", icon: 'teachers' },
+  { key: 'attendance', path: '/davomat', label: 'Davomat', icon: 'attendance' },
+  { key: 'students', path: '/talabalar', label: 'Talabalar', icon: 'students' },
+  { key: 'pubs', path: '/ilmiy', label: 'Ilmiy ishlar', icon: 'pubs' },
+  { key: 'projects', path: '/loyihalar', label: 'Loyihalar', icon: 'projects' },
+  { key: 'stwork', path: '/talabalar-bilan-ish', label: 'Talabalar bilan ish', icon: 'stwork' },
+  { key: 'kpi', path: '/kpi', label: 'KPI', icon: 'kpi' },
+  { sep: 'Hisobot' },
+  { key: 'reports', path: '/hisobotlar', label: 'Hisobotlar va tarix', icon: 'reports' },
+  { key: 'quality', path: '/sifat', label: 'Agent sifati', icon: 'quality' },
+  { sep: 'Tizim' },
+  { key: 'settings', path: '/sozlamalar', label: 'Sozlamalar', icon: 'settings' },
+];

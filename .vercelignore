@@ -1,0 +1,11 @@
+# Vercel'ga faqat ilova manbasi yuklansin: kalitlar, testlar, manba hujjatlar emas
+.env
+.env.*
+!.env.example
+docs/
+tests/
+scripts/
+.claude/
+dist/
+node_modules/
+*.log

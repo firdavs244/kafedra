@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.vercel/
+coverage/
+
+# Kalitlar faqat shu yerda turadi — hech qachon repoga tushmasin
+.env
+.env.local
+.env.*.local
+
+*.log
+.DS_Store
+Thumbs.db
+.claude/settings.local.json
+
+.vercel
+
+# Asl manba materiallar: dizayner HTML'ida begona Groq kaliti, PDF'da shaxsiy
+# ma'lumot (telefon, e-pochta) bor — ommaviy repoga chiqmasin, lokal qoladi
+docs/manba/kafedra_agent.html
+docs/manba/KafedraAgent.pdf

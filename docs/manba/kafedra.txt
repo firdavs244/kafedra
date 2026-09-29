@@ -1,0 +1,23 @@
+“KafedraAgent” — kafedra mudiri uchun AI yordamchi. O‘qituvchilarning yuklamasi, fanlar, ilmiy ishlar, maqolalar, loyihalar, talabalar bilan ishlash va KPI ko‘rsatkichlarini bir joyda kuzatadi. Masalan: “Bu oy kafedrada qaysi KPI bandlari bajarilmagan?”, “qaysi o‘qituvchilarning ilmiy maqola rejasi ortda qolmoqda?” kabi so‘rovlarni bajaradi.
+
+
+Ha, albatta. O‘quv rejalarni yuborsangiz, aynan shular asosida KafedraAgentni boshlashimiz mumkin. Bu hatto yaxshi boshlanish, chunki real universitet hujjati asosida MVP strukturasini tuzamiz.
+O‘quv rejani shu yerga tashlang — PDF, Excel, Word yoki rasmlarda bo‘lsa ham bo‘ladi.
+Men undan quyidagilarni ajratib beraman:
+📚 Fanlar
+👨‍🏫 O‘qituvchilar / fan biriktirilishi
+⏱️ Yuklama va soatlar
+🎓 Kurs va guruhlar
+📅 Semestr / muddatlar
+📊 Keyinchalik KPIga aylantirish mumkin bo‘lgan ko‘rsatkichlar
+🤖 AI qanday savollarga javob berishi mumkinligi
+Masalan, o‘quv reja asosida mudir:
+“4-kursda qaysi fanlar bor?”
+“Bu semestr jami nechta soat yuklama bor?”
+“Qaysi o‘qituvchiga nechta soat tushgan?”
+“Qaysi fan bo‘yicha yuklama taqsimlanmagan?”
+deb so‘rashi mumkin.
+Eng muhimi
+Hozir dastur yozishni boshlamaymiz.
+Avval siz yuborgan real o‘quv rejani tahlil qilamiz → ma'lumotlar strukturasini chiqaramiz → KafedraAgent MVP sxemasini tuzamiz → keyin kodlashni boshlaymiz.
+O‘quv rejani yuboring. PDF/Excel/Word/rasm — qaysi formatda bo‘lsa ham bo‘ladi.shuni qila olamizmi
