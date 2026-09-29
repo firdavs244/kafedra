@@ -9,3 +9,6 @@ scripts/
 dist/
 node_modules/
 *.log
+*.rar
+*.zip
+*.7z
