@@ -1,6 +1,11 @@
-# Repoda qator oxiri doim LF (Windows/Mac/Linux orasida farq chiqmasin)
-* text=auto eol=lf
-*.jpg binary
-*.png binary
+* text=auto
+*.sh text eol=lf
+*.py text eol=lf
+*.conf text eol=lf
+*.yml text eol=lf
+Dockerfile text eol=lf
+*.docx binary
 *.xlsx binary
 *.pdf binary
+*.png binary
+*.jpg binary

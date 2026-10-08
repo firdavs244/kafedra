@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: kafedra-agent
+    runtime: python
+    plan: free
+    buildCommand: "echo 'Qo''shimcha kutubxona kerak emas'"
+    startCommand: "python run.py --host 0.0.0.0"
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.7"

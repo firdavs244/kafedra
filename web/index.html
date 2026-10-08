@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KafedraAgent</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div id="login" class="login hidden">
+  <form id="loginForm" class="login-card">
+    <div class="brand big"><span class="logo-plate"><img class="logo" src="/assets/logo.png" alt="KafedraAgent" onerror="this.closest('.brand').classList.add('nologo')"></span><span class="wordmark">Kafedra<b>Agent</b></span></div>
+    <p class="muted">Dalillarga asoslangan sun'iy intellektli boshqaruv platformasi</p>
+    <label>Login<input name="username" value="mudir" autocomplete="username"></label>
+    <label>Parol<input name="password" type="password" value="mudir123" autocomplete="current-password"></label>
+    <button class="btn primary" type="submit">Kirish</button>
+    <p id="loginErr" class="err"></p>
+    <div class="demo-users">
+      <b>Namuna foydalanuvchilar:</b>
+      <a data-u="mudir" data-p="mudir123">mudir — kafedra mudiri</a>
+      <a data-u="dekan" data-p="dekan123">dekan — dekan (faqat ko'rish)</a>
+      <a data-u="aliyev" data-p="aliyev123">aliyev — o'qituvchi</a>
+      <a data-u="karimova" data-p="karimova123">karimova — o'qituvchi</a>
+      <a data-u="admin" data-p="admin123">admin — tizim administratori</a>
+    </div>
+    <div class="login-uni"><img class="logo-uni" src="/assets/university-logo.png" alt="Buxoro davlat universiteti" onerror="this.style.display='none'"></div>
+  </form>
+</div>
+<div id="app" class="app hidden">
+  <div class="scrim" id="scrim"></div>
+  <aside class="side" id="side">
+    <div class="brand"><span class="logo-plate"><img class="logo" src="/assets/logo.png" alt="KafedraAgent" onerror="this.closest('.brand').classList.add('nologo')"></span><span class="wordmark">Kafedra<b>Agent</b></span></div>
+    <nav id="nav"></nav>
+    <div class="side-foot" id="who"></div>
+  </aside>
+  <main>
+    <header class="top">
+      <div class="top-l"><button class="menu-btn" id="menuBtn" aria-label="Menyu" aria-controls="side"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><div class="chain">Ma'lumot → Dalil → Tahlil → Xavf → Tavsiya → Vazifa → Nazorat → Natija</div></div>
+      <div class="top-r"><a class="btn sm ai" href="#chat">Sun'iy intellekt</a><span id="today" class="pill"></span><span id="llm" class="pill"></span><button class="btn sm" id="logout">Chiqish</button></div>
+      <div class="top-uni"><img class="logo-uni" src="/assets/university-logo.png" alt="Buxoro davlat universiteti" onerror="this.style.display='none'"></div>
+    </header>
+    <section id="view"></section>
+  </main>
+</div>
+<div id="modal" class="modal hidden"><div class="modal-card"><button class="x" id="modalX" aria-label="Yopish">×</button><div id="modalBody"></div></div></div>
+<script src="/app.js"></script>
+</body>
+</html>

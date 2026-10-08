@@ -1,0 +1,45 @@
+# KafedraAgent on a shared VPS — its own compose project, its own network,
+# its own limits. Nothing here can reach or restart another project's
+# containers, and the port is bound to localhost only: the host nginx is the
+# one door in (deploy/server/nginx-kafedra-ip.conf).
+#
+#   docker compose -f deploy/server/docker-compose.yml up -d --build
+#
+# Measured before choosing the limits (2026-10-08, 400 requests from 20
+# parallel users): 400/400 answered, resident memory 29 MB idle and 32 MB
+# after the load. 256 MB is eight times that; the cap exists so that this
+# app can never be the reason another project on the box runs out of memory.
+name: kafedra
+
+services:
+  app:
+    build:
+      context: ../..
+    image: kafedra-agent:latest
+    container_name: kafedra-app
+    restart: unless-stopped
+    # tini as PID 1: it forwards the healthcheck's SIGTERM to the app, which
+    # a bare Python PID 1 would silently ignore.
+    init: true
+    environment:
+      KA_HOST: 0.0.0.0
+      KA_PORT: "8000"
+    ports:
+      - "127.0.0.1:8090:8000"
+    mem_limit: 256m
+    memswap_limit: 256m
+    cpus: 1.0
+    # ThreadingHTTPServer starts a thread per connection; a flood of slow
+    # connections must hit this ceiling, not the host's.
+    pids_limit: 256
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "python", "deploy/server/healthcheck.py"]
+      interval: 30s
+      timeout: 40s
+      start_period: 90s
+      retries: 1
