@@ -16,10 +16,10 @@ git reset --hard --quiet origin/main
 
 docker compose -f deploy/server/docker-compose.yml up -d --build --force-recreate
 
-# Wait for the app itself, not for Docker: a started container is not a
-# serving one.
+# Wait for the app itself, through its own proxy on the public port - the
+# path a visitor takes. A started container is not a serving one.
 for i in $(seq 1 45); do
-  if curl -fsS -m 3 http://127.0.0.1:8090/ 2>/dev/null | grep -q "<title>KafedraAgent"; then
+  if curl -fsS -m 3 http://127.0.0.1:8080/ 2>/dev/null | grep -q "<title>KafedraAgent"; then
     # No `docker image prune` here: on a shared box that would also delete
     # other projects' dangling images. A rebuild leaves ~150 MB behind.
     echo "kafedra: up after $((i * 2))s ($(git rev-parse --short HEAD))"
@@ -29,5 +29,5 @@ for i in $(seq 1 45); do
 done
 
 echo "kafedra: NOT answering after 90s" >&2
-docker compose -f deploy/server/docker-compose.yml logs --tail 50 app >&2
+docker compose -f deploy/server/docker-compose.yml logs --tail 50 >&2
 exit 1

@@ -34,14 +34,14 @@ docker build -t kafedra-agent .
 docker run -d --name kafedra -p 80:8000 --restart unless-stopped kafedra-agent
 ```
 
-## B2. Boshqa loyihalar ishlab turgan umumiy server (Docker + mavjud nginx)
-`install_ubuntu.sh` bunday serverda ishlatilmasin: u nginx'ning `default` saytini o'chiradi va 80-portni to'liq egallaydi.
+## B2. Boshqa loyihalar ishlab turgan umumiy server — alohida port
+`install_ubuntu.sh` bunday serverda ishlatilmasin: u nginx'ning `default` saytini o'chiradi va 80-portni egallaydi, ya'ni boshqa loyihaning manzilini olib qo'yadi.
 Uning o'rniga (root sifatida):
 ```bash
 git clone https://github.com/firdavs244/kafedra.git /opt/kafedra/src
-bash /opt/kafedra/src/deploy/server/bootstrap.sh
+bash /opt/kafedra/src/deploy/server/bootstrap.sh      # -> http://SERVER_IP:8080
 ```
-Alohida compose loyihasi (`kafedra`), faqat `127.0.0.1:8090`, RAM/CPU cheklangan; nginx'ga bitta fayl qo'shiladi va boshqa saytlarning javobi oldin/keyin solishtiriladi — o'zgarsa, avtomatik orqaga qaytariladi.
+Alohida compose loyihasi (`kafedra`): ilova + o'zining nginx'i, bitta ochiq port — 8080. Host nginx'iga, 80/443-portlarga va firewall'ga tegilmaydi; skript o'rnatishdan oldin va keyin IP'ning javobini va boshqa konteynerlarni solishtiradi.
 Namoyishni boshlang'ich holatga qaytarish / yangilash: `bash /opt/kafedra/deploy.sh`.
 
 ## C. Render.com (bepul, server kerak emas)

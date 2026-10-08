@@ -1,14 +1,16 @@
-# KafedraAgent on a shared VPS — its own compose project, its own network,
-# its own limits. Nothing here can reach or restart another project's
-# containers, and the port is bound to localhost only: the host nginx is the
-# one door in (deploy/server/nginx-kafedra-ip.conf).
+# KafedraAgent on a shared VPS: http://<SERVER_IP>:8080/
+#
+# Its own compose project, its own network, its own nginx. The host's nginx
+# and the bare IP on port 80 belong to another project and are NOT touched:
+# nothing here reads or writes /etc/nginx, and no other project's container
+# can be reached from this network.
 #
 #   docker compose -f deploy/server/docker-compose.yml up -d --build
 #
 # Measured before choosing the limits (2026-10-08, 400 requests from 20
-# parallel users): 400/400 answered, resident memory 29 MB idle and 32 MB
-# after the load. 256 MB is eight times that; the cap exists so that this
-# app can never be the reason another project on the box runs out of memory.
+# parallel users): 400/400 answered, app resident memory 29 MB idle and 32 MB
+# after the load. The caps exist so that this demo can never be the reason
+# another project on the box runs out of memory.
 name: kafedra
 
 services:
@@ -24,15 +26,16 @@ services:
     environment:
       KA_HOST: 0.0.0.0
       KA_PORT: "8000"
-    ports:
-      - "127.0.0.1:8090:8000"
+    # No published port: only the proxy below reaches the app.
+    expose:
+      - "8000"
     mem_limit: 256m
     memswap_limit: 256m
     cpus: 1.0
     # ThreadingHTTPServer starts a thread per connection; a flood of slow
     # connections must hit this ceiling, not the host's.
     pids_limit: 256
-    logging:
+    logging: &logging
       driver: json-file
       options:
         max-size: "10m"
@@ -43,3 +46,21 @@ services:
       timeout: 40s
       start_period: 90s
       retries: 1
+
+  # The app's server is Python's standard-library one: a thread per
+  # connection and no timeouts. Facing the internet for a week it needs
+  # something in front that buffers, times out slow clients and caps uploads.
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: kafedra-proxy
+    restart: unless-stopped
+    depends_on:
+      - app
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx-proxy.conf:/etc/nginx/conf.d/default.conf:ro
+    mem_limit: 64m
+    cpus: 0.5
+    pids_limit: 64
+    logging: *logging
