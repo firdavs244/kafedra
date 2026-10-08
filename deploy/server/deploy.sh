@@ -20,8 +20,9 @@ docker compose -f deploy/server/docker-compose.yml up -d --build --force-recreat
 # serving one.
 for i in $(seq 1 45); do
   if curl -fsS -m 3 http://127.0.0.1:8090/ 2>/dev/null | grep -q "<title>KafedraAgent"; then
+    # No `docker image prune` here: on a shared box that would also delete
+    # other projects' dangling images. A rebuild leaves ~150 MB behind.
     echo "kafedra: up after $((i * 2))s ($(git rev-parse --short HEAD))"
-    docker image prune -f >/dev/null
     exit 0
   fi
   sleep 2

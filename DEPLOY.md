@@ -34,6 +34,16 @@ docker build -t kafedra-agent .
 docker run -d --name kafedra -p 80:8000 --restart unless-stopped kafedra-agent
 ```
 
+## B2. Boshqa loyihalar ishlab turgan umumiy server (Docker + mavjud nginx)
+`install_ubuntu.sh` bunday serverda ishlatilmasin: u nginx'ning `default` saytini o'chiradi va 80-portni to'liq egallaydi.
+Uning o'rniga (root sifatida):
+```bash
+git clone https://github.com/firdavs244/kafedra.git /opt/kafedra/src
+bash /opt/kafedra/src/deploy/server/bootstrap.sh
+```
+Alohida compose loyihasi (`kafedra`), faqat `127.0.0.1:8090`, RAM/CPU cheklangan; nginx'ga bitta fayl qo'shiladi va boshqa saytlarning javobi oldin/keyin solishtiriladi — o'zgarsa, avtomatik orqaga qaytariladi.
+Namoyishni boshlang'ich holatga qaytarish / yangilash: `bash /opt/kafedra/deploy.sh`.
+
 ## C. Render.com (bepul, server kerak emas)
 1. Loyihani GitHub'ga yuklang.
 2. render.com → New → Blueprint → repozitoriyni tanlang (`render.yaml` avtomatik o'qiladi).
